@@ -1,23 +1,30 @@
 # Receipts: starter Makefile. Lanes replace the TODO bodies as they land. Spec 00 task 1 owns this file.
-PY ?= python
+PY ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,$(if $(wildcard contracts/.venv/bin/python),contracts/.venv/bin/python,python3))
+PYTHON := $(abspath $(shell command -v "$(PY)"))
 LANES := foundation generator stats verifier agents overlay evals azure web
 
-.PHONY: setup contracts contracts-lock-check accept $(addprefix accept-,$(LANES)) demo demo-live report
+.PHONY: setup contracts contracts-lock-check lint accept accept-00-foundation $(addprefix accept-,$(LANES)) demo demo-live report
 
 setup:
-	$(PY) -m pip install -e contracts -e services/common
-	@echo "TODO: install each service and apps/web (pnpm install)"
+	@if [ ! -x .venv/bin/python ]; then $(PYTHON) -m venv .venv; fi
+	.venv/bin/python -m pip install -e '.[dev]'
+	@echo "Foundation and frozen contract modules installed in editable mode."
 
 contracts:
-	cd contracts && $(PY) -m pytest -q -p no:cacheprovider
+	cd contracts && $(PYTHON) -m pytest -q -p no:cacheprovider
 
 contracts-lock-check:
-	$(PY) scripts/contracts_lock.py --check
+	$(PYTHON) scripts/contracts_lock.py --check
+
+lint:
+	$(PYTHON) -m ruff check services/common scripts
 
 accept: contracts contracts-lock-check $(addprefix accept-,$(LANES))
 
 accept-foundation: contracts contracts-lock-check
-	$(PY) -m pytest -q services/common
+	$(PYTHON) -m pytest -q services/common
+
+accept-00-foundation: accept-foundation
 
 accept-generator:
 	$(PY) -m pytest -q services/generator

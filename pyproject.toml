@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "receipts-foundation"
+version = "0.1.0"
+description = "Local-first shared foundation for Receipts services"
+requires-python = ">=3.12"
+dependencies = [
+    "jsonschema>=4.21",
+    "referencing>=0.35",
+    "rfc3339-validator>=0.1.4",
+    "pydantic-settings>=2.2",
+    "opentelemetry-api>=1.25",
+    "opentelemetry-sdk>=1.25",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[tool.setuptools]
+py-modules = ["validate", "stats_ref"]
+packages = [
+    "receipts_common",
+    "receipts_common.bus",
+    "receipts_common.store",
+    "receipts_common.llm",
+]
+package-dir = { "" = "contracts", "receipts_common" = "services/common/src/receipts_common" }
+
+[tool.pytest.ini_options]
+testpaths = ["services/common/tests"]
+addopts = "-ra"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["services/common/src"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]

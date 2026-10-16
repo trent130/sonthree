@@ -1,0 +1,28 @@
+# Tasks: Foundation
+
+- [ ] 1. Bootstrap the monorepo
+  - Create the layout in `structure.md`, root `pyproject.toml`, `Makefile` (`setup`, `contracts`, `accept`, `accept-<lane>`, `demo`, `report`), `.gitignore`, `ruff` config.
+  - Copy the contracts drop into `contracts/`, add `contracts/pyproject.toml` exposing `validate` and `stats_ref`, and generate `contracts.lock`.
+  - _Requirements: 1.1, 1.2, 1.3, 1.4_
+- [ ] 2. Config, ids and validating I/O
+  - `config.py`, `ids.py`, `io.py` with `ValidatingWriter` and `ValidatingReader` built on `validate_*`, plus `ContractViolation`.
+  - Unit tests: every example document passes; a mutated one raises with the field path.
+  - _Requirements: 4.1, 4.2_
+- [ ] 3. In-process EventBus and in-memory Store
+  - Implement both with offsets, groups, ordering by key, append-only, claim revision rule, `latest_verdict`, `eligible_claims` delegating to `validate.eligible_claims`.
+  - Write the shared conformance suite now so the cloud versions must pass it later.
+  - _Requirements: 2.1, 2.2, 2.4, 3.1, 3.2, 3.3, 3.4_
+- [ ] 4. Cassette LLM client
+  - `complete_json` with `live`, `record`, `replay`, retries and typed errors; a fake live provider for tests.
+  - _Requirements: 5.1, 5.2, 5.3_
+- [ ] 5. Telemetry and CI skeleton  (**merge tasks 1 to 5 before other lanes branch**)
+  - `stage_span()` context manager, console exporter locally, App Insights exporter by config; GitHub Actions workflow running lint, tests, contracts and lock check with no secrets.
+  - _Requirements: 6.1, 6.2, 7.1, 7.2_
+- [ ] 6. Azure implementations (can wait for spec 07)
+  - `eventhubs.py` and `postgres.py` plus migrations and grants; run the conformance suite against them in a nightly job or manually.
+  - _Requirements: 2.3, 3.2_
+- [ ] 7. Dead letters and counters
+  - `deadletter` topic, per-topic counters exposed on `/metrics`.
+  - _Requirements: 4.2, 4.3_
+- [ ] 8. Acceptance target
+  - `make accept-foundation`: contracts suite, lock check, conformance suite (local), cassette round trip.

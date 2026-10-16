@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0.0",
+  "set_id": "evalset_demo",
+  "set_version": "0.1.0",
+  "labels_file": "labels.jsonl",
+  "labels_sha256": "0e70b772876b0c556234e51146ebc5bd8a645d16d80a43059c580ec963ad9852",
+  "label_count": 14,
+  "streams": [
+    {
+      "match_id": "ngt-ald-demo01",
+      "file": "../valid/match_stream.jsonl",
+      "sha256": "85e0d3e72b4d58b59a18c4165c0f8a54c2b34b2b8a98dc063c237abdda1993a8",
+      "event_count": 16
+    }
+  ]
+}

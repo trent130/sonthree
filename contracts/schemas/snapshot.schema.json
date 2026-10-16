@@ -1,0 +1,70 @@
+{
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "$ref": "urn:receipts:schema:v1:common#/$defs/SchemaVersion"
+    },
+    "snapshot_id": {
+      "$ref": "urn:receipts:schema:v1:common#/$defs/SnapshotId"
+    },
+    "match_id": {
+      "$ref": "urn:receipts:schema:v1:common#/$defs/MatchId"
+    },
+    "as_of_seq": {
+      "$ref": "urn:receipts:schema:v1:common#/$defs/Seq",
+      "description": "Only events with seq <= as_of_seq were used."
+    },
+    "stats_engine_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "Version of the metric definitions (STATS.md). A formula change bumps this."
+    },
+    "window": {
+      "$ref": "urn:receipts:schema:v1:common#/$defs/Window",
+      "description": "Match-clock window the metrics cover. Semantic rule: to_ms <= time of the as_of event."
+    },
+    "entities": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 60,
+      "items": {
+        "type": "object",
+        "properties": {
+          "subject": {
+            "$ref": "urn:receipts:schema:v1:common#/$defs/EntityRef"
+          },
+          "metrics": {
+            "type": "object",
+            "minProperties": 1,
+            "propertyNames": {
+              "$ref": "urn:receipts:schema:v1:common#/$defs/MetricId"
+            },
+            "additionalProperties": {
+              "type": "number"
+            },
+            "description": "Only metrics that are defined for this subject and window appear. Allowed subject types per metric: common x-metric-scope."
+          }
+        },
+        "required": [
+          "subject",
+          "metrics"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schema_version",
+    "snapshot_id",
+    "match_id",
+    "as_of_seq",
+    "stats_engine_version",
+    "window",
+    "entities"
+  ],
+  "additionalProperties": false,
+  "description": "Deterministic metric values for one window of one match. Anything shown with a stats number cites one by id, and the validator recomputes it from the event stream.",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:receipts:schema:v1:snapshot",
+  "title": "Stats snapshot (v1)"
+}

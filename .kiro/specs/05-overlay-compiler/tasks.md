@@ -1,0 +1,25 @@
+# Tasks: Overlay compiler
+
+- [ ] 1. Candidates and documents on fixtures
+  - Build lower thirds, stat cards, momentum bars and player tags from `contracts/examples`; compare with `overlays.jsonl`.
+  - _Requirements: 1.1, 1.2, 2.1, 2.2, 2.3, 2.4_
+- [ ] 2. Priority and profiles
+  - Salience mapping, boosts, density floors, per-profile streams.
+  - _Requirements: 1.3, 4.1, 4.2, 4.3_
+- [ ] 3. Resolver
+  - Slot table, preemption, stale and collision drops, decision records; property tests against `check_overlays`.
+  - _Requirements: 3.2, 5.1, 5.2, 5.3_
+- [ ] 4. Timing
+  - `trigger_seq`, `start_ms`, durations from configuration.
+  - _Requirements: 3.1, 3.3_
+- [ ] 5. Verified-only gate and report
+  - Eligibility via `eligible_claims`, `unverified` drops, the zero-unverified-shown metric.
+  - _Requirements: 6.1, 6.2_
+- [ ] 6. Latency stamping and metrics
+  - Spans to `stages_ms`, histograms per kind and tier, `/metrics`.
+  - _Requirements: 7.1, 7.2_
+- [ ] 7. Runner
+  - Live subscription in local mode against the generator and agents; deterministic output with a fixed clock.
+  - _Requirements: 1.1, 8.1_
+- [ ] 8. Acceptance target
+  - `make accept-overlay`: `validate.py --overlays` with snapshots and profiles on the demo match, resolver property tests, gate test.

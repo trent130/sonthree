@@ -1,0 +1,34 @@
+# Tasks: Integration and demo
+
+- [ ] 1. Fixture-level integration test
+  - Chain stats, verifier, agents (rules only), overlay compiler on `contracts/examples` and validate everything; this is the first end-to-end green and should exist by 17 Oct.
+  - _Requirements: 2.1_
+- [ ] 2. Run exporter and invariant checker
+  - `scripts/check_run.py`: export all topics, run `validate_all`, compute zero-unverified and dead-letter counts.
+  - _Requirements: 2.1, 2.2, 2.3_
+- [ ] 3. `make demo` locally
+  - Services, 20-minute cut at 20x, built web app, cassettes; fix what breaks.
+  - _Requirements: 1.1, 1.3_
+- [ ] 4. Determinism and reviewed-text gates
+  - Two-run diff in replay mode; `--require-reviewed` on the demo path; human review of the Swahili renderings used by the demo.
+  - _Requirements: 2.4, 2.5_
+- [ ] 5. Fault injection
+  - Judge outage and crash-restart scenario with invariant checks.
+  - _Requirements: 2.6_
+- [ ] 6. Report generator
+  - `scripts/report.py`, `make report`, `docs/REPORT.md` from generated numbers only.
+  - _Requirements: 3.1, 3.2_
+- [ ] 7. Cloud run
+  - `make demo-live` against the deployed environment; compare latency with local.
+  - _Requirements: 1.2_
+- [ ] 8. Demo script and rehearsal
+  - `docs/demo-script.md` with the beats; dry runs from a cold start; narration drafted and timed.
+  - _Requirements: 4.1, 4.2_
+- [ ] 9. Record
+  - Record on or after 22 Oct once the build is frozen; check trademarks and music; upload as public; copy the URL.
+  - _Requirements: 4.3_
+- [ ] 10. Submission package
+  - README (pitch, diagram, run instructions), repo public, project page, tagline, challenge link, submit by 26 Oct.
+  - _Requirements: 5.1, 5.2, 5.3, 5.4_
+- [ ] 11. Acceptance target
+  - `make accept`: all lane accept targets, then `check_run` on a replay run, then determinism and gate checks.

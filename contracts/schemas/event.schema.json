@@ -1,0 +1,1080 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:receipts:schema:v1:event",
+  "title": "Match event (v1)",
+  "description": "One line of the match stream (JSONL). Discriminated by `type`. Pitch geometry, ids and clock semantics are defined in common.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/MatchMetadataEvent"
+    },
+    {
+      "$ref": "#/$defs/PeriodStartEvent"
+    },
+    {
+      "$ref": "#/$defs/PeriodEndEvent"
+    },
+    {
+      "$ref": "#/$defs/PassEvent"
+    },
+    {
+      "$ref": "#/$defs/ShotEvent"
+    },
+    {
+      "$ref": "#/$defs/TackleEvent"
+    },
+    {
+      "$ref": "#/$defs/PossessionChangeEvent"
+    },
+    {
+      "$ref": "#/$defs/PressureEvent"
+    },
+    {
+      "$ref": "#/$defs/FoulEvent"
+    },
+    {
+      "$ref": "#/$defs/CardEvent"
+    },
+    {
+      "$ref": "#/$defs/SubstitutionEvent"
+    },
+    {
+      "$ref": "#/$defs/TrackingFrameEvent"
+    }
+  ],
+  "$defs": {
+    "Envelope": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/SchemaVersion"
+        },
+        "event_id": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/EventId"
+        },
+        "match_id": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/MatchId"
+        },
+        "seq": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/Seq"
+        },
+        "type": {
+          "enum": [
+            "match_metadata",
+            "period_start",
+            "period_end",
+            "pass",
+            "shot",
+            "tackle",
+            "possession_change",
+            "pressure",
+            "foul",
+            "card",
+            "substitution",
+            "tracking_frame"
+          ]
+        },
+        "period": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/Period"
+        },
+        "match_time_ms": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/MatchTimeMs"
+        },
+        "emitted_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Wall-clock time the generator emitted the event. Used only for latency measurement; excluded from the determinism guarantee."
+        },
+        "possession_id": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/PossessionId"
+        },
+        "team_id": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/TeamId"
+        },
+        "player_id": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/PlayerId"
+        },
+        "location": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/PitchPoint"
+        },
+        "payload": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "schema_version",
+        "event_id",
+        "match_id",
+        "seq",
+        "type",
+        "period",
+        "match_time_ms",
+        "payload"
+      ]
+    },
+    "MatchMetadataPayload": {
+      "type": "object",
+      "properties": {
+        "synthetic": {
+          "const": true
+        },
+        "competition": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "venue": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "teams": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "object",
+            "properties": {
+              "team_id": {
+                "$ref": "urn:receipts:schema:v1:common#/$defs/TeamId"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 60
+              },
+              "short_name": {
+                "type": "string",
+                "pattern": "^[A-Z]{3}$"
+              },
+              "side": {
+                "enum": [
+                  "home",
+                  "away"
+                ]
+              },
+              "primary_color": {
+                "type": "string",
+                "pattern": "^#[0-9A-Fa-f]{6}$"
+              }
+            },
+            "required": [
+              "team_id",
+              "name",
+              "short_name",
+              "side",
+              "primary_color"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "players": {
+          "type": "array",
+          "minItems": 22,
+          "maxItems": 40,
+          "items": {
+            "type": "object",
+            "properties": {
+              "player_id": {
+                "$ref": "urn:receipts:schema:v1:common#/$defs/PlayerId"
+              },
+              "team_id": {
+                "$ref": "urn:receipts:schema:v1:common#/$defs/TeamId"
+              },
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 60
+              },
+              "shirt_number": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 99
+              },
+              "position": {
+                "enum": [
+                  "GK",
+                  "CB",
+                  "FB",
+                  "DM",
+                  "CM",
+                  "AM",
+                  "W",
+                  "ST"
+                ]
+              },
+              "starter": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "player_id",
+              "team_id",
+              "name",
+              "shirt_number",
+              "position",
+              "starter"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "generator": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 60
+            },
+            "version": {
+              "type": "string",
+              "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+            },
+            "seed": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 4294967295
+            }
+          },
+          "required": [
+            "name",
+            "version",
+            "seed"
+          ],
+          "additionalProperties": false
+        },
+        "tracking_hz": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 25
+        },
+        "pitch": {
+          "type": "object",
+          "properties": {
+            "length_m": {
+              "const": 105
+            },
+            "width_m": {
+              "const": 68
+            }
+          },
+          "required": [
+            "length_m",
+            "width_m"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "synthetic",
+        "competition",
+        "teams",
+        "players",
+        "generator",
+        "tracking_hz",
+        "pitch"
+      ],
+      "additionalProperties": false
+    },
+    "PeriodStartPayload": {
+      "type": "object",
+      "properties": {
+        "home_attacking_towards": {
+          "enum": [
+            "+x",
+            "-x"
+          ]
+        }
+      },
+      "required": [
+        "home_attacking_towards"
+      ],
+      "additionalProperties": false
+    },
+    "PeriodEndPayload": {
+      "type": "object",
+      "properties": {
+        "added_time_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 600000
+        },
+        "is_final": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "added_time_ms",
+        "is_final"
+      ],
+      "additionalProperties": false
+    },
+    "PassPayload": {
+      "type": "object",
+      "properties": {
+        "receiver_id": {
+          "anyOf": [
+            {
+              "$ref": "urn:receipts:schema:v1:common#/$defs/PlayerId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "end_location": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/PitchPoint"
+        },
+        "outcome": {
+          "enum": [
+            "complete",
+            "incomplete",
+            "intercepted",
+            "out_of_play"
+          ]
+        },
+        "height": {
+          "enum": [
+            "ground",
+            "low",
+            "high"
+          ]
+        },
+        "body_part": {
+          "enum": [
+            "foot",
+            "head",
+            "other"
+          ]
+        },
+        "set_piece": {
+          "enum": [
+            "none",
+            "kick_off",
+            "throw_in",
+            "free_kick",
+            "corner",
+            "goal_kick"
+          ]
+        }
+      },
+      "required": [
+        "receiver_id",
+        "end_location",
+        "outcome",
+        "height",
+        "body_part",
+        "set_piece"
+      ],
+      "additionalProperties": false
+    },
+    "ShotPayload": {
+      "type": "object",
+      "properties": {
+        "outcome": {
+          "enum": [
+            "goal",
+            "saved",
+            "blocked",
+            "off_target",
+            "post"
+          ]
+        },
+        "body_part": {
+          "enum": [
+            "foot",
+            "head",
+            "other"
+          ]
+        },
+        "situation": {
+          "enum": [
+            "open_play",
+            "counter",
+            "set_piece",
+            "penalty"
+          ]
+        },
+        "xg": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/Probability"
+        },
+        "xg_model": {
+          "type": "string",
+          "pattern": "^[a-z0-9._-]{3,40}$"
+        },
+        "ball_speed_kmh": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/SpeedKmh"
+        },
+        "target": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "y": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 68
+                },
+                "z": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 8
+                }
+              },
+              "required": [
+                "y",
+                "z"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "goalkeeper_id": {
+          "anyOf": [
+            {
+              "$ref": "urn:receipts:schema:v1:common#/$defs/PlayerId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "assist_event_id": {
+          "anyOf": [
+            {
+              "$ref": "urn:receipts:schema:v1:common#/$defs/EventId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "outcome",
+        "body_part",
+        "situation",
+        "xg",
+        "xg_model",
+        "ball_speed_kmh",
+        "target",
+        "goalkeeper_id",
+        "assist_event_id"
+      ],
+      "additionalProperties": false
+    },
+    "TacklePayload": {
+      "type": "object",
+      "properties": {
+        "outcome": {
+          "enum": [
+            "won",
+            "lost"
+          ]
+        },
+        "tackled_player_id": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/PlayerId"
+        }
+      },
+      "required": [
+        "outcome",
+        "tackled_player_id"
+      ],
+      "additionalProperties": false
+    },
+    "PossessionChangePayload": {
+      "type": "object",
+      "properties": {
+        "cause": {
+          "enum": [
+            "kick_off",
+            "tackle",
+            "interception",
+            "incomplete_pass",
+            "out_of_play",
+            "foul",
+            "shot",
+            "loose_ball"
+          ]
+        },
+        "previous_team_id": {
+          "anyOf": [
+            {
+              "$ref": "urn:receipts:schema:v1:common#/$defs/TeamId"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "cause",
+        "previous_team_id"
+      ],
+      "additionalProperties": false
+    },
+    "PressurePayload": {
+      "type": "object",
+      "properties": {
+        "target_player_id": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/PlayerId"
+        },
+        "distance_m": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 15
+        },
+        "duration_ms": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 30000
+        },
+        "forced_turnover": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "target_player_id",
+        "distance_m",
+        "duration_ms",
+        "forced_turnover"
+      ],
+      "additionalProperties": false
+    },
+    "FoulPayload": {
+      "type": "object",
+      "properties": {
+        "fouled_player_id": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/PlayerId"
+        }
+      },
+      "required": [
+        "fouled_player_id"
+      ],
+      "additionalProperties": false
+    },
+    "CardPayload": {
+      "type": "object",
+      "properties": {
+        "card": {
+          "enum": [
+            "yellow",
+            "red"
+          ]
+        },
+        "reason": {
+          "enum": [
+            "foul",
+            "dissent",
+            "time_wasting",
+            "handball",
+            "other"
+          ]
+        }
+      },
+      "required": [
+        "card",
+        "reason"
+      ],
+      "additionalProperties": false
+    },
+    "SubstitutionPayload": {
+      "type": "object",
+      "properties": {
+        "player_off_id": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/PlayerId"
+        },
+        "player_on_id": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/PlayerId"
+        }
+      },
+      "required": [
+        "player_off_id",
+        "player_on_id"
+      ],
+      "additionalProperties": false
+    },
+    "TrackingFramePayload": {
+      "type": "object",
+      "properties": {
+        "frame_index": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "ball": {
+          "type": "object",
+          "properties": {
+            "x": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 105
+            },
+            "y": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 68
+            },
+            "z": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 30
+            },
+            "speed_kmh": {
+              "$ref": "urn:receipts:schema:v1:common#/$defs/SpeedKmh"
+            }
+          },
+          "required": [
+            "x",
+            "y",
+            "z",
+            "speed_kmh"
+          ],
+          "additionalProperties": false
+        },
+        "players": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 22,
+          "items": {
+            "type": "object",
+            "properties": {
+              "player_id": {
+                "$ref": "urn:receipts:schema:v1:common#/$defs/PlayerId"
+              },
+              "x": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 105
+              },
+              "y": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 68
+              },
+              "speed_kmh": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 45
+              }
+            },
+            "required": [
+              "player_id",
+              "x",
+              "y",
+              "speed_kmh"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "frame_index",
+        "ball",
+        "players"
+      ],
+      "additionalProperties": false
+    },
+    "MatchMetadataEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "match_metadata"
+            },
+            "payload": {
+              "$ref": "#/$defs/MatchMetadataPayload"
+            },
+            "period": {
+              "const": 0
+            },
+            "team_id": false,
+            "player_id": false,
+            "location": false,
+            "possession_id": false
+          },
+          "required": [
+            "type",
+            "payload"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "PeriodStartEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "period_start"
+            },
+            "payload": {
+              "$ref": "#/$defs/PeriodStartPayload"
+            },
+            "period": {
+              "enum": [
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            "team_id": false,
+            "player_id": false,
+            "location": false,
+            "possession_id": false
+          },
+          "required": [
+            "type",
+            "payload"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "PeriodEndEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "period_end"
+            },
+            "payload": {
+              "$ref": "#/$defs/PeriodEndPayload"
+            },
+            "period": {
+              "enum": [
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            "team_id": false,
+            "player_id": false,
+            "location": false,
+            "possession_id": false
+          },
+          "required": [
+            "type",
+            "payload"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "PassEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "pass"
+            },
+            "payload": {
+              "$ref": "#/$defs/PassPayload"
+            },
+            "period": {
+              "enum": [
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "payload",
+            "team_id",
+            "player_id",
+            "location",
+            "possession_id"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "ShotEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "shot"
+            },
+            "payload": {
+              "$ref": "#/$defs/ShotPayload"
+            },
+            "period": {
+              "enum": [
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "payload",
+            "team_id",
+            "player_id",
+            "location",
+            "possession_id"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "TackleEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "tackle"
+            },
+            "payload": {
+              "$ref": "#/$defs/TacklePayload"
+            },
+            "period": {
+              "enum": [
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "payload",
+            "team_id",
+            "player_id",
+            "location",
+            "possession_id"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "PossessionChangeEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "possession_change"
+            },
+            "payload": {
+              "$ref": "#/$defs/PossessionChangePayload"
+            },
+            "period": {
+              "enum": [
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            "player_id": false
+          },
+          "required": [
+            "type",
+            "payload",
+            "team_id",
+            "possession_id"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "PressureEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "pressure"
+            },
+            "payload": {
+              "$ref": "#/$defs/PressurePayload"
+            },
+            "period": {
+              "enum": [
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "payload",
+            "team_id",
+            "player_id",
+            "location",
+            "possession_id"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "FoulEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "foul"
+            },
+            "payload": {
+              "$ref": "#/$defs/FoulPayload"
+            },
+            "period": {
+              "enum": [
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "payload",
+            "team_id",
+            "player_id",
+            "location"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "CardEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "card"
+            },
+            "payload": {
+              "$ref": "#/$defs/CardPayload"
+            },
+            "period": {
+              "enum": [
+                1,
+                2,
+                3,
+                4
+              ]
+            }
+          },
+          "required": [
+            "type",
+            "payload",
+            "team_id",
+            "player_id"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "SubstitutionEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "substitution"
+            },
+            "payload": {
+              "$ref": "#/$defs/SubstitutionPayload"
+            },
+            "period": {
+              "enum": [
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            "player_id": false,
+            "location": false,
+            "possession_id": false
+          },
+          "required": [
+            "type",
+            "payload",
+            "team_id"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "TrackingFrameEvent": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "tracking_frame"
+            },
+            "payload": {
+              "$ref": "#/$defs/TrackingFramePayload"
+            },
+            "period": {
+              "enum": [
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            "team_id": false,
+            "player_id": false,
+            "location": false,
+            "possession_id": false
+          },
+          "required": [
+            "type",
+            "payload"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    }
+  }
+}

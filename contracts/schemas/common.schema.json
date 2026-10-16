@@ -1,0 +1,445 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:receipts:schema:v1:common",
+  "title": "Receipts shared definitions (v1)",
+  "$defs": {
+    "SchemaVersion": {
+      "type": "string",
+      "pattern": "^1\\.[0-9]+\\.[0-9]+$",
+      "description": "Major 1 only. Minor bumps are additive; patch bumps are docs/clarifications."
+    },
+    "MatchId": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_-]{2,63}$"
+    },
+    "EventId": {
+      "type": "string",
+      "pattern": "^ev_[0-9]{7}$",
+      "description": "'ev_' + seq zero-padded to 7 digits. Enforced by the semantic check, not by the schema."
+    },
+    "ClaimId": {
+      "type": "string",
+      "pattern": "^cl_[0-9]{7}$"
+    },
+    "VerdictId": {
+      "type": "string",
+      "pattern": "^vd_[0-9]{7}$"
+    },
+    "SnapshotId": {
+      "type": "string",
+      "pattern": "^snap_[0-9]{7}$"
+    },
+    "PlayerId": {
+      "type": "string",
+      "pattern": "^p_[0-9]{3,4}$"
+    },
+    "TeamId": {
+      "type": "string",
+      "pattern": "^t_[a-z0-9_]{2,24}$"
+    },
+    "PossessionId": {
+      "type": "string",
+      "pattern": "^pos_[0-9]{5}$"
+    },
+    "Seq": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9999999,
+      "description": "Gapless, strictly increasing per match, starting at 1."
+    },
+    "MatchTimeMs": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 10800000,
+      "description": "Milliseconds on the continuous match clock (stoppage included, never reset between periods)."
+    },
+    "Period": {
+      "type": "integer",
+      "enum": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "description": "0 = pre-match (metadata only), 1-2 = regulation, 3-4 = extra time."
+    },
+    "Lang": {
+      "type": "string",
+      "pattern": "^[a-z]{2,3}(-[A-Z][a-z]{3})?(-[A-Z]{2})?$",
+      "description": "BCP-47 subset, e.g. en, sw, sw-KE, fr."
+    },
+    "PitchPoint": {
+      "type": "object",
+      "properties": {
+        "x": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 105
+        },
+        "y": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 68
+        }
+      },
+      "required": [
+        "x",
+        "y"
+      ],
+      "additionalProperties": false,
+      "description": "Meters. Origin bottom-left, x along the 105 m length, y along the 68 m width. Absolute pitch coordinates (never flipped per team)."
+    },
+    "SpeedKmh": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 160
+    },
+    "Probability": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "Window": {
+      "type": "object",
+      "properties": {
+        "from_ms": {
+          "$ref": "#/$defs/MatchTimeMs"
+        },
+        "to_ms": {
+          "$ref": "#/$defs/MatchTimeMs"
+        }
+      },
+      "required": [
+        "from_ms",
+        "to_ms"
+      ],
+      "additionalProperties": false,
+      "description": "Inclusive match-clock window. Semantic rule: from_ms < to_ms."
+    },
+    "EntityRef": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "entity_type": {
+              "const": "player"
+            },
+            "entity_id": {
+              "$ref": "#/$defs/PlayerId"
+            }
+          },
+          "required": [
+            "entity_type",
+            "entity_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "entity_type": {
+              "const": "team"
+            },
+            "entity_id": {
+              "$ref": "#/$defs/TeamId"
+            }
+          },
+          "required": [
+            "entity_type",
+            "entity_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "entity_type": {
+              "const": "match"
+            },
+            "entity_id": {
+              "$ref": "#/$defs/MatchId"
+            }
+          },
+          "required": [
+            "entity_type",
+            "entity_id"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "MetricId": {
+      "enum": [
+        "goals",
+        "shots",
+        "shots_on_target",
+        "xg",
+        "passes",
+        "pass_accuracy_pct",
+        "avg_pass_length_m",
+        "avg_pass_difficulty",
+        "possession_pct",
+        "tackles_won",
+        "pressures",
+        "ppda",
+        "control_index",
+        "pressure_index",
+        "rhythm_index",
+        "distance_km",
+        "top_speed_kmh",
+        "sprints",
+        "max_ball_speed_kmh",
+        "max_shot_speed_kmh"
+      ],
+      "description": "Registry of metrics the stats engine computes and the Verifier recomputes. Definitions live in README.md."
+    },
+    "FailureCode": {
+      "enum": [
+        "schema_invalid",
+        "missing_evidence",
+        "evidence_not_found",
+        "evidence_irrelevant",
+        "future_leak",
+        "wrong_player",
+        "wrong_team",
+        "wrong_time_window",
+        "wrong_value",
+        "wrong_comparison",
+        "wrong_trend_direction",
+        "unsupported_causal",
+        "causal_order_violation",
+        "rendering_adds_detail",
+        "rendering_contradicts",
+        "translation_drift"
+      ],
+      "description": "Shared by Verifier verdicts and eval labels so that expected and observed failures use one vocabulary. missing_evidence = cited evidence exists but does not include the events the assertion needs. evidence_irrelevant = cited evidence is about something else. schema_invalid is raised before any check runs and never appears in eval labels."
+    },
+    "OverlayId": {
+      "type": "string",
+      "pattern": "^ov_[0-9]{7}$"
+    },
+    "ProfileId": {
+      "type": "string",
+      "pattern": "^prof_[a-z0-9_]{3,32}$",
+      "description": "Personalization profile id. The profile schema is defined with shared state."
+    },
+    "MetricUnit": {
+      "enum": [
+        "count",
+        "index",
+        "km",
+        "kmh",
+        "m",
+        "pct",
+        "ratio",
+        "xg"
+      ]
+    },
+    "LabelId": {
+      "type": "string",
+      "pattern": "^lb_[0-9]{7}$"
+    },
+    "EvalSetId": {
+      "type": "string",
+      "pattern": "^evalset_[a-z0-9_]{3,32}$"
+    },
+    "CheckId": {
+      "enum": [
+        "evidence_resolves",
+        "evidence_within_as_of",
+        "evidence_supports_assertion",
+        "assertion_numeric_match",
+        "rendering_entails_assertion",
+        "causal_precedence",
+        "causal_plausibility",
+        "translation_fidelity"
+      ]
+    },
+    "CorruptionOperator": {
+      "enum": [
+        "cite_future_event",
+        "contradict_rendering",
+        "drift_translation",
+        "drop_primary_evidence",
+        "embellish_rendering",
+        "fabricate_evidence_id",
+        "flip_comparison",
+        "flip_trend",
+        "invent_causal_link",
+        "perturb_value",
+        "redirect_evidence",
+        "reverse_causal_order",
+        "shift_window",
+        "swap_player",
+        "swap_team"
+      ]
+    },
+    "RecapId": {
+      "type": "string",
+      "pattern": "^rc_[0-9]{7}$"
+    }
+  },
+  "x-metric-units": {
+    "goals": "count",
+    "shots": "count",
+    "shots_on_target": "count",
+    "xg": "xg",
+    "passes": "count",
+    "pass_accuracy_pct": "pct",
+    "avg_pass_length_m": "m",
+    "avg_pass_difficulty": "ratio",
+    "possession_pct": "pct",
+    "tackles_won": "count",
+    "pressures": "count",
+    "ppda": "ratio",
+    "control_index": "index",
+    "pressure_index": "index",
+    "rhythm_index": "index",
+    "distance_km": "km",
+    "top_speed_kmh": "kmh",
+    "sprints": "count",
+    "max_ball_speed_kmh": "kmh",
+    "max_shot_speed_kmh": "kmh"
+  },
+  "x-failure-code-checks": {
+    "evidence_not_found": [
+      "evidence_resolves"
+    ],
+    "evidence_irrelevant": [
+      "evidence_supports_assertion"
+    ],
+    "missing_evidence": [
+      "evidence_supports_assertion"
+    ],
+    "future_leak": [
+      "evidence_within_as_of"
+    ],
+    "wrong_player": [
+      "evidence_supports_assertion"
+    ],
+    "wrong_team": [
+      "evidence_supports_assertion"
+    ],
+    "wrong_time_window": [
+      "evidence_supports_assertion"
+    ],
+    "wrong_value": [
+      "assertion_numeric_match"
+    ],
+    "wrong_comparison": [
+      "assertion_numeric_match"
+    ],
+    "wrong_trend_direction": [
+      "assertion_numeric_match"
+    ],
+    "unsupported_causal": [
+      "causal_plausibility"
+    ],
+    "causal_order_violation": [
+      "causal_precedence"
+    ],
+    "rendering_adds_detail": [
+      "rendering_entails_assertion"
+    ],
+    "rendering_contradicts": [
+      "rendering_entails_assertion"
+    ],
+    "translation_drift": [
+      "translation_fidelity"
+    ]
+  },
+  "x-corruption-operators": {
+    "swap_player": "wrong_player",
+    "swap_team": "wrong_team",
+    "shift_window": "wrong_time_window",
+    "perturb_value": "wrong_value",
+    "flip_comparison": "wrong_comparison",
+    "flip_trend": "wrong_trend_direction",
+    "drop_primary_evidence": "missing_evidence",
+    "redirect_evidence": "evidence_irrelevant",
+    "cite_future_event": "future_leak",
+    "fabricate_evidence_id": "evidence_not_found",
+    "invent_causal_link": "unsupported_causal",
+    "reverse_causal_order": "causal_order_violation",
+    "embellish_rendering": "rendering_adds_detail",
+    "contradict_rendering": "rendering_contradicts",
+    "drift_translation": "translation_drift"
+  },
+  "x-metric-scope": {
+    "goals": [
+      "player",
+      "team"
+    ],
+    "shots": [
+      "player",
+      "team"
+    ],
+    "shots_on_target": [
+      "player",
+      "team"
+    ],
+    "xg": [
+      "player",
+      "team"
+    ],
+    "passes": [
+      "player",
+      "team"
+    ],
+    "pass_accuracy_pct": [
+      "player",
+      "team"
+    ],
+    "avg_pass_length_m": [
+      "player",
+      "team"
+    ],
+    "avg_pass_difficulty": [
+      "player",
+      "team"
+    ],
+    "tackles_won": [
+      "player",
+      "team"
+    ],
+    "pressures": [
+      "player",
+      "team"
+    ],
+    "distance_km": [
+      "player",
+      "team"
+    ],
+    "top_speed_kmh": [
+      "player",
+      "team"
+    ],
+    "sprints": [
+      "player",
+      "team"
+    ],
+    "max_shot_speed_kmh": [
+      "player",
+      "team"
+    ],
+    "possession_pct": [
+      "team"
+    ],
+    "ppda": [
+      "team"
+    ],
+    "control_index": [
+      "team"
+    ],
+    "pressure_index": [
+      "team"
+    ],
+    "rhythm_index": [
+      "team"
+    ],
+    "max_ball_speed_kmh": [
+      "match"
+    ]
+  }
+}

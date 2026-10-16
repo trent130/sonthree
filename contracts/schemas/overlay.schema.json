@@ -1,0 +1,516 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:receipts:schema:v1:overlay",
+  "title": "Timed overlay instruction (v1)",
+  "description": "One line of the overlay stream (JSONL) consumed by the renderer. Resolved timeline: collisions are already decided, and dropped overlays are kept with a reason for audit.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/LowerThirdOverlay"
+    },
+    {
+      "$ref": "#/$defs/StatCardOverlay"
+    },
+    {
+      "$ref": "#/$defs/MomentumBarOverlay"
+    },
+    {
+      "$ref": "#/$defs/PlayerTagOverlay"
+    }
+  ],
+  "$defs": {
+    "Envelope": {
+      "type": "object",
+      "properties": {
+        "schema_version": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/SchemaVersion"
+        },
+        "overlay_id": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/OverlayId"
+        },
+        "match_id": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/MatchId"
+        },
+        "kind": {
+          "enum": [
+            "lower_third",
+            "stat_card",
+            "momentum_bar",
+            "player_tag"
+          ]
+        },
+        "disposition": {
+          "enum": [
+            "scheduled",
+            "preempted",
+            "dropped"
+          ],
+          "description": "scheduled = shown for its full duration. preempted = shown until `displaced_by` starts. dropped = never shown (kept for audit)."
+        },
+        "displaced_by": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/OverlayId"
+        },
+        "drop_reason": {
+          "enum": [
+            "collision",
+            "stale",
+            "unverified"
+          ]
+        },
+        "priority": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Derived from the salience of the cited claims (x100) plus any compiler adjustment. Decides collisions."
+        },
+        "lang": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/Lang"
+        },
+        "profile_id": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/ProfileId"
+        },
+        "timing": {
+          "type": "object",
+          "properties": {
+            "trigger_seq": {
+              "$ref": "urn:receipts:schema:v1:common#/$defs/Seq",
+              "description": "The event whose arrival caused this overlay to be compiled. Must be >= as_of_seq of every cited claim."
+            },
+            "start_ms": {
+              "$ref": "urn:receipts:schema:v1:common#/$defs/MatchTimeMs",
+              "description": "Match-clock time to show it. Never earlier than the trigger event's own time."
+            },
+            "duration_ms": {
+              "type": "integer",
+              "minimum": 500,
+              "maximum": 60000
+            }
+          },
+          "required": [
+            "trigger_seq",
+            "start_ms",
+            "duration_ms"
+          ],
+          "additionalProperties": false
+        },
+        "source": {
+          "type": "object",
+          "properties": {
+            "claim_ids": {
+              "type": "array",
+              "uniqueItems": true,
+              "maxItems": 4,
+              "items": {
+                "$ref": "urn:receipts:schema:v1:common#/$defs/ClaimId"
+              }
+            },
+            "snapshot_id": {
+              "$ref": "urn:receipts:schema:v1:common#/$defs/SnapshotId"
+            }
+          },
+          "required": [
+            "claim_ids"
+          ],
+          "additionalProperties": false,
+          "description": "Provenance. Every overlay that shows a claim cites it; every number from the stats engine cites a snapshot."
+        },
+        "payload": {
+          "type": "object"
+        },
+        "latency": {
+          "type": "object",
+          "properties": {
+            "event_emitted_at": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Copy of the trigger event's emitted_at."
+            },
+            "compiled_at": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Wall-clock time the overlay was finished. compiled_at - event_emitted_at is the event-to-overlay latency."
+            },
+            "stages_ms": {
+              "type": "object",
+              "properties": {
+                "interpret": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "explain": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "verify": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "render": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "interpret",
+                "explain",
+                "verify",
+                "render"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "event_emitted_at",
+            "compiled_at",
+            "stages_ms"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "schema_version",
+        "overlay_id",
+        "match_id",
+        "kind",
+        "disposition",
+        "priority",
+        "lang",
+        "timing",
+        "source",
+        "payload"
+      ],
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "disposition": {
+                "const": "preempted"
+              }
+            },
+            "required": [
+              "disposition"
+            ]
+          },
+          "then": {
+            "required": [
+              "displaced_by"
+            ]
+          },
+          "else": {
+            "properties": {
+              "displaced_by": false
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "disposition": {
+                "const": "dropped"
+              }
+            },
+            "required": [
+              "disposition"
+            ]
+          },
+          "then": {
+            "required": [
+              "drop_reason"
+            ]
+          },
+          "else": {
+            "properties": {
+              "drop_reason": false
+            }
+          }
+        }
+      ]
+    },
+    "LowerThirdPayload": {
+      "type": "object",
+      "properties": {
+        "kicker": {
+          "enum": [
+            "key_moment",
+            "why_it_matters",
+            "milestone",
+            "recap"
+          ]
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 400,
+          "description": "Must equal the claim's rendering in the overlay's lang (semantic check)."
+        },
+        "highlight_player_ids": {
+          "type": "array",
+          "maxItems": 3,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "urn:receipts:schema:v1:common#/$defs/PlayerId"
+          }
+        }
+      },
+      "required": [
+        "kicker",
+        "text"
+      ],
+      "additionalProperties": false
+    },
+    "StatCardPayload": {
+      "type": "object",
+      "properties": {
+        "metrics": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 4,
+          "items": {
+            "type": "object",
+            "properties": {
+              "claim_id": {
+                "$ref": "urn:receipts:schema:v1:common#/$defs/ClaimId"
+              },
+              "subject": {
+                "$ref": "urn:receipts:schema:v1:common#/$defs/EntityRef"
+              },
+              "metric": {
+                "$ref": "urn:receipts:schema:v1:common#/$defs/MetricId"
+              },
+              "value": {
+                "type": "number"
+              },
+              "unit": {
+                "$ref": "urn:receipts:schema:v1:common#/$defs/MetricUnit"
+              }
+            },
+            "required": [
+              "claim_id",
+              "subject",
+              "metric",
+              "value",
+              "unit"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "metrics"
+      ],
+      "additionalProperties": false
+    },
+    "MomentumBarPayload": {
+      "type": "object",
+      "properties": {
+        "metric": {
+          "enum": [
+            "control_index",
+            "pressure_index",
+            "rhythm_index"
+          ]
+        },
+        "window": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/Window"
+        },
+        "values": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "object",
+            "properties": {
+              "team_id": {
+                "$ref": "urn:receipts:schema:v1:common#/$defs/TeamId"
+              },
+              "value": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100
+              }
+            },
+            "required": [
+              "team_id",
+              "value"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "metric",
+        "window",
+        "values"
+      ],
+      "additionalProperties": false
+    },
+    "PlayerTagPayload": {
+      "type": "object",
+      "properties": {
+        "player_id": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/PlayerId"
+        },
+        "indicator": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "metric": {
+                  "enum": [
+                    "speed_kmh",
+                    "distance_km"
+                  ]
+                },
+                "threshold": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                },
+                "observed": {
+                  "type": "number",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "metric",
+                "threshold",
+                "observed"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "player_id",
+        "indicator"
+      ],
+      "additionalProperties": false,
+      "description": "The renderer attaches the tag to the player's position in the tracking frames. indicator is null for a plain name tag."
+    },
+    "LowerThirdOverlay": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "kind": {
+              "const": "lower_third"
+            },
+            "payload": {
+              "$ref": "#/$defs/LowerThirdPayload"
+            },
+            "source": {
+              "properties": {
+                "claim_ids": {
+                  "minItems": 1,
+                  "maxItems": 1
+                }
+              }
+            }
+          },
+          "required": [
+            "kind",
+            "payload"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "StatCardOverlay": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "kind": {
+              "const": "stat_card"
+            },
+            "payload": {
+              "$ref": "#/$defs/StatCardPayload"
+            },
+            "source": {
+              "properties": {
+                "claim_ids": {
+                  "minItems": 1,
+                  "maxItems": 4
+                }
+              }
+            }
+          },
+          "required": [
+            "kind",
+            "payload"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "MomentumBarOverlay": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "kind": {
+              "const": "momentum_bar"
+            },
+            "payload": {
+              "$ref": "#/$defs/MomentumBarPayload"
+            },
+            "source": {
+              "properties": {
+                "claim_ids": {
+                  "minItems": 0,
+                  "maxItems": 0
+                }
+              },
+              "required": [
+                "snapshot_id"
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "payload"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    },
+    "PlayerTagOverlay": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "kind": {
+              "const": "player_tag"
+            },
+            "payload": {
+              "$ref": "#/$defs/PlayerTagPayload"
+            },
+            "source": {
+              "properties": {
+                "claim_ids": {
+                  "minItems": 0,
+                  "maxItems": 0
+                }
+              }
+            }
+          },
+          "required": [
+            "kind",
+            "payload"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false
+    }
+  }
+}

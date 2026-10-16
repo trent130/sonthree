@@ -1,0 +1,109 @@
+{
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "$ref": "urn:receipts:schema:v1:common#/$defs/SchemaVersion"
+    },
+    "profile_id": {
+      "$ref": "urn:receipts:schema:v1:common#/$defs/ProfileId"
+    },
+    "mode": {
+      "enum": [
+        "casual",
+        "analyst",
+        "broadcaster"
+      ]
+    },
+    "lang": {
+      "$ref": "urn:receipts:schema:v1:common#/$defs/Lang"
+    },
+    "favorite_team_ids": {
+      "type": "array",
+      "maxItems": 2,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "urn:receipts:schema:v1:common#/$defs/TeamId"
+      }
+    },
+    "favorite_player_ids": {
+      "type": "array",
+      "maxItems": 3,
+      "uniqueItems": true,
+      "items": {
+        "$ref": "urn:receipts:schema:v1:common#/$defs/PlayerId"
+      }
+    },
+    "focus": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "none"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "player"
+            },
+            "player_id": {
+              "$ref": "urn:receipts:schema:v1:common#/$defs/PlayerId"
+            }
+          },
+          "required": [
+            "kind",
+            "player_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "metric"
+            },
+            "metric": {
+              "$ref": "urn:receipts:schema:v1:common#/$defs/MetricId"
+            }
+          },
+          "required": [
+            "kind",
+            "metric"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "description": "none = whole match. player = follow one player throughout. metric = one performance metric the viewer cares about."
+    },
+    "density": {
+      "enum": [
+        "minimal",
+        "standard",
+        "rich"
+      ],
+      "description": "Overlay density. Shown overlays for this profile must have priority >= 70 (minimal), 40 (standard) or 0 (rich)."
+    }
+  },
+  "required": [
+    "schema_version",
+    "profile_id",
+    "mode",
+    "lang",
+    "favorite_team_ids",
+    "favorite_player_ids",
+    "focus",
+    "density"
+  ],
+  "additionalProperties": false,
+  "description": "Who an overlay stream or recap is personalized for. Contains no personal data: only preferences.",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:receipts:schema:v1:profile",
+  "title": "Personalization profile (v1)"
+}

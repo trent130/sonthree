@@ -1,0 +1,28 @@
+# Tasks: Stats engine
+
+- [ ] 1. Library on fixtures
+  - `StatsService.snapshot` and `recompute` over `contracts/examples/valid/match_stream.jsonl`; regenerate `snapshots.json` and compare byte for byte.
+  - _Requirements: 1.2, 1.3, 1.5, 4.1_
+- [ ] 2. Id allocation and dedupe
+  - Monotonic `snap_` ids, request-keyed cache, same id for same request.
+  - _Requirements: 1.4_
+- [ ] 3. Standing snapshots
+  - Rolling 5-minute and whole-match team snapshots on every non-frame event and every 30 s of match time.
+  - _Requirements: 1.1, 2.1_
+- [ ] 4. Threshold detector
+  - Config, cooldown, minimal per-player snapshot, `threshold` notice.
+  - _Requirements: 2.2, 2.3_
+- [ ] 5. Match state builder
+  - Status, score, whole-match snapshot, key moments via the Store; boundary and on-demand refresh.
+  - _Requirements: 3.1, 3.2_
+- [ ] 6. Runner
+  - Subscribe to `events`, publish `snapshots` and `matchstate`; works in local mode against the generator stream.
+  - _Requirements: 1.1, 3.2_
+- [ ] 7. Differential and contract tests
+  - Random requests versus `stats_ref`; validator checks on demo-match output.
+  - _Requirements: 6.1, 6.2_
+- [ ] 8. Benchmark and, only if needed, incremental accumulators
+  - Measure p95 on the 90-minute demo match; optimize behind the same interface.
+  - _Requirements: 5.1, 5.2_
+- [ ] 9. Acceptance target
+  - `make accept-stats`: differential test, `validate.py --snapshots` and `--state` on the demo match, benchmark.

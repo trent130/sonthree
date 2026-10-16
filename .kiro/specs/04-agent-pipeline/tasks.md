@@ -1,0 +1,34 @@
+# Tasks: Agent pipeline
+
+- [ ] 1. Rules Analyst on fixtures
+  - Triggers and templates producing claims from `contracts/examples`; output passes `validate_claim` and `check_claims`.
+  - _Requirements: 1.1, 1.3_
+- [ ] 2. Workflow skeleton with a stub Verifier
+  - Framework workflow with the handoffs, using the real Store and bus and an always-accept stub; claim lineage and `supersedes`.
+  - _Requirements: 4.1, 4.2, 4.3_
+- [ ] 3. Integrate the real Verifier
+  - Wire spec 03, the rewrite loop, attempt limits, template fallback, abandon records.
+  - _Requirements: 2.2, 2.3, 2.4_
+- [ ] 4. Narrator
+  - Prompt, output schema, rewrite-with-hint behavior; cassette tests including a rejection-then-fix case.
+  - _Requirements: 2.1, 2.3_
+- [ ] 5. Insight Analyst
+  - Tools, `propose_claim` with schema feedback, causal pattern tool, as-of boundary tests.
+  - _Requirements: 1.2, 1.4_
+- [ ] 6. Translator, glossary and review tool
+  - Swahili and French glossaries, per-language Verifier checks, retry then omit, `review` CLI that appends reviewed revisions.
+  - _Requirements: 3.1, 3.2, 3.3, 3.4_
+- [ ] 7. Recap Editor
+  - Section selection from key moments, text assembly, recap-level claims through the Verifier.
+  - _Requirements: 7.1, 7.2_
+- [ ] 8. Failure recovery
+  - Retries, circuit breaker, work items and leases, crash-restart test.
+  - _Requirements: 5.1, 5.2, 5.3_
+- [ ] 9. Latency tiers
+  - Measure fast and narrative paths on the demo match; tune concurrency, prompts and model choice to meet 6.1 and 6.2 or record the miss.
+  - _Requirements: 6.1, 6.2, 6.3_
+- [ ] 10. Offline determinism
+  - Record cassettes for the demo match; replay twice and compare outputs byte for byte.
+  - _Requirements: 8.1_
+- [ ] 11. Acceptance target
+  - `make accept-agents`: replay run on the demo match, `validate.py` with claims, verdicts, recap and state, fault-injection invariants.

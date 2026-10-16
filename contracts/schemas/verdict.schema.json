@@ -1,0 +1,194 @@
+{
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "$ref": "urn:receipts:schema:v1:common#/$defs/SchemaVersion"
+    },
+    "verdict_id": {
+      "$ref": "urn:receipts:schema:v1:common#/$defs/VerdictId"
+    },
+    "claim_id": {
+      "$ref": "urn:receipts:schema:v1:common#/$defs/ClaimId"
+    },
+    "match_id": {
+      "$ref": "urn:receipts:schema:v1:common#/$defs/MatchId"
+    },
+    "attempt": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10,
+      "description": "Position in the rewrite loop for this claim lineage (1 = first check)."
+    },
+    "verifier": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "stats_engine_version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        },
+        "judge_deployment": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "version",
+        "stats_engine_version",
+        "judge_deployment"
+      ],
+      "additionalProperties": false
+    },
+    "status": {
+      "enum": [
+        "verified",
+        "rejected"
+      ]
+    },
+    "checks": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "items": {
+        "type": "object",
+        "properties": {
+          "check": {
+            "$ref": "urn:receipts:schema:v1:common#/$defs/CheckId"
+          },
+          "status": {
+            "enum": [
+              "pass",
+              "fail",
+              "skipped"
+            ]
+          },
+          "lang": {
+            "$ref": "urn:receipts:schema:v1:common#/$defs/Lang"
+          },
+          "expected": {
+            "type": [
+              "string",
+              "number",
+              "boolean",
+              "null"
+            ]
+          },
+          "observed": {
+            "type": [
+              "string",
+              "number",
+              "boolean",
+              "null"
+            ]
+          },
+          "detail": {
+            "type": "string",
+            "maxLength": 300
+          }
+        },
+        "required": [
+          "check",
+          "status"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "failure_codes": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "urn:receipts:schema:v1:common#/$defs/FailureCode"
+      }
+    },
+    "rewrite_hint": {
+      "type": "string",
+      "maxLength": 300
+    },
+    "latency_ms": {
+      "type": "integer",
+      "minimum": 0
+    }
+  },
+  "required": [
+    "schema_version",
+    "verdict_id",
+    "claim_id",
+    "match_id",
+    "attempt",
+    "verifier",
+    "status",
+    "checks",
+    "failure_codes",
+    "latency_ms"
+  ],
+  "additionalProperties": false,
+  "description": "Verifier output for one attempt on one claim. Append-only audit record.",
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "verified"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "failure_codes": {
+            "maxItems": 0
+          },
+          "checks": {
+            "not": {
+              "contains": {
+                "properties": {
+                  "status": {
+                    "const": "fail"
+                  }
+                },
+                "required": [
+                  "status"
+                ]
+              }
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "failure_codes": {
+            "minItems": 1
+          },
+          "checks": {
+            "contains": {
+              "properties": {
+                "status": {
+                  "const": "fail"
+                }
+              },
+              "required": [
+                "status"
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:receipts:schema:v1:verdict",
+  "title": "Verifier verdict (v1)"
+}

@@ -1,0 +1,31 @@
+# Tasks: Azure deployment
+
+- [ ] 1. Confirm access today
+  - Check subscription, region, quota for the model deployments, and permission to create a Foundry project and role assignments. Record the result in `docs/architecture.md`. If a model is unavailable, choose another now.
+  - _Requirements: 1.2, 3.1_
+- [ ] 2. Bicep modules
+  - `network`, `data` (Postgres, Key Vault), `messaging` (Event Hubs), `monitoring`, `ai` (Foundry project and deployments), `apps` (environment, registry, container apps with identities); `bicep build` in CI.
+  - _Requirements: 1.1, 1.2, 1.3_
+- [ ] 3. Roles and grants
+  - Role assignments in Bicep; post-deploy script that applies migrations and the INSERT and SELECT grants; a test that an UPDATE from the service role fails.
+  - _Requirements: 1.3, 1.4_
+- [ ] 4. Azure implementations in common
+  - Finish `eventhubs.py` and `postgres.py`, run the conformance suite against the deployed resources.
+  - _Requirements: 2.1, 2.3_
+- [ ] 5. `azd` wiring and first deploy
+  - `azure.yaml`, Dockerfiles per service, `azd up` of a hello-world slice (api plus one hub) to prove the path early.
+  - _Requirements: 1.1_
+- [ ] 6. Scaling rules and warm settings
+  - Lag-based scaling where supported, scale to zero except the API, pre-warm script for recording day.
+  - _Requirements: 2.2_
+- [ ] 7. Tracing, dashboard and the Foundry mirror
+  - Azure Monitor exporter, shared trace ids, workbook JSON, `/healthz` and `/metrics`; give the eval harness a Foundry project endpoint and the Foundry User role so its best-effort upload works.
+  - _Requirements: 3.1, 3.2, 4.1, 4.2_
+- [ ] 8. CI and CD
+  - CI additions (bicep lint and build), CD with OIDC and the smoke test.
+  - _Requirements: 5.1, 5.2, 5.3_
+- [ ] 9. Cost controls and fallback
+  - Budget alert, tags, SKU review, cost note, and a rehearsal of `make demo` fully offline.
+  - _Requirements: 6.1, 6.2, 6.3_
+- [ ] 10. Acceptance target
+  - `make accept-azure`: `bicep build`, policy checks on grants, and, when credentials exist, the deployed smoke test.

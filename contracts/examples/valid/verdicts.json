@@ -1,0 +1,179 @@
+[
+  {
+    "schema_version": "1.0.0",
+    "verdict_id": "vd_0000001",
+    "claim_id": "cl_0000001",
+    "match_id": "ngt-ald-demo01",
+    "attempt": 1,
+    "verifier": {
+      "version": "0.1.0",
+      "stats_engine_version": "0.1.0",
+      "judge_deployment": "foundry-judge-demo"
+    },
+    "status": "verified",
+    "checks": [
+      {
+        "check": "evidence_resolves",
+        "status": "pass"
+      },
+      {
+        "check": "evidence_within_as_of",
+        "status": "pass"
+      },
+      {
+        "check": "assertion_numeric_match",
+        "status": "pass",
+        "expected": 0.31,
+        "observed": 0.31
+      },
+      {
+        "check": "rendering_entails_assertion",
+        "status": "pass",
+        "lang": "en"
+      },
+      {
+        "check": "translation_fidelity",
+        "status": "pass",
+        "lang": "sw"
+      }
+    ],
+    "failure_codes": [],
+    "latency_ms": 412
+  },
+  {
+    "schema_version": "1.0.0",
+    "verdict_id": "vd_0000002",
+    "claim_id": "cl_0000004",
+    "match_id": "ngt-ald-demo01",
+    "attempt": 1,
+    "verifier": {
+      "version": "0.1.0",
+      "stats_engine_version": "0.1.0",
+      "judge_deployment": null
+    },
+    "status": "rejected",
+    "checks": [
+      {
+        "check": "evidence_resolves",
+        "status": "pass"
+      },
+      {
+        "check": "causal_precedence",
+        "status": "pass"
+      },
+      {
+        "check": "rendering_entails_assertion",
+        "status": "fail",
+        "lang": "en",
+        "detail": "Rendering says the pressure 'led to' the tackle, but the mechanism only supports 'set up'."
+      }
+    ],
+    "failure_codes": [
+      "rendering_adds_detail"
+    ],
+    "rewrite_hint": "Soften to the supported mechanism: pressure set up the tackle.",
+    "latency_ms": 655
+  },
+  {
+    "schema_version": "1.0.0",
+    "match_id": "ngt-ald-demo01",
+    "verifier": {
+      "version": "0.1.0",
+      "stats_engine_version": "0.1.0",
+      "judge_deployment": "foundry-judge-demo"
+    },
+    "failure_codes": [],
+    "verdict_id": "vd_0000003",
+    "claim_id": "cl_0000002",
+    "attempt": 1,
+    "status": "verified",
+    "latency_ms": 233,
+    "checks": [
+      {
+        "check": "evidence_resolves",
+        "status": "pass"
+      },
+      {
+        "check": "evidence_within_as_of",
+        "status": "pass"
+      },
+      {
+        "check": "evidence_supports_assertion",
+        "status": "pass"
+      },
+      {
+        "check": "rendering_entails_assertion",
+        "status": "pass",
+        "lang": "en"
+      }
+    ]
+  },
+  {
+    "schema_version": "1.0.0",
+    "match_id": "ngt-ald-demo01",
+    "verifier": {
+      "version": "0.1.0",
+      "stats_engine_version": "0.1.0",
+      "judge_deployment": "foundry-judge-demo"
+    },
+    "failure_codes": [],
+    "verdict_id": "vd_0000004",
+    "claim_id": "cl_0000003",
+    "attempt": 1,
+    "status": "verified",
+    "latency_ms": 198,
+    "checks": [
+      {
+        "check": "evidence_resolves",
+        "status": "pass"
+      },
+      {
+        "check": "evidence_within_as_of",
+        "status": "pass"
+      },
+      {
+        "check": "evidence_supports_assertion",
+        "status": "pass"
+      },
+      {
+        "check": "rendering_entails_assertion",
+        "status": "pass",
+        "lang": "en"
+      }
+    ]
+  },
+  {
+    "schema_version": "1.0.0",
+    "match_id": "ngt-ald-demo01",
+    "verifier": {
+      "version": "0.1.0",
+      "stats_engine_version": "0.1.0",
+      "judge_deployment": "foundry-judge-demo"
+    },
+    "failure_codes": [],
+    "verdict_id": "vd_0000005",
+    "claim_id": "cl_0000005",
+    "attempt": 2,
+    "status": "verified",
+    "latency_ms": 371,
+    "checks": [
+      {
+        "check": "evidence_resolves",
+        "status": "pass"
+      },
+      {
+        "check": "causal_precedence",
+        "status": "pass"
+      },
+      {
+        "check": "causal_plausibility",
+        "status": "pass"
+      },
+      {
+        "check": "rendering_entails_assertion",
+        "status": "pass",
+        "lang": "en"
+      }
+    ]
+  }
+]

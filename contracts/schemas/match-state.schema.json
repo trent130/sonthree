@@ -1,0 +1,85 @@
+{
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "$ref": "urn:receipts:schema:v1:common#/$defs/SchemaVersion"
+    },
+    "match_id": {
+      "$ref": "urn:receipts:schema:v1:common#/$defs/MatchId"
+    },
+    "as_of_seq": {
+      "$ref": "urn:receipts:schema:v1:common#/$defs/Seq"
+    },
+    "status": {
+      "enum": [
+        "live",
+        "half_time",
+        "full_time"
+      ]
+    },
+    "score": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "properties": {
+          "team_id": {
+            "$ref": "urn:receipts:schema:v1:common#/$defs/TeamId"
+          },
+          "goals": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 30
+          }
+        },
+        "required": [
+          "team_id",
+          "goals"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "snapshot_id": {
+      "$ref": "urn:receipts:schema:v1:common#/$defs/SnapshotId",
+      "description": "Whole-match-so-far snapshot: window 0 to the time of the as_of event, same as_of_seq."
+    },
+    "key_moments": {
+      "type": "array",
+      "maxItems": 12,
+      "items": {
+        "type": "object",
+        "properties": {
+          "claim_id": {
+            "$ref": "urn:receipts:schema:v1:common#/$defs/ClaimId"
+          },
+          "rank": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 12
+          }
+        },
+        "required": [
+          "claim_id",
+          "rank"
+        ],
+        "additionalProperties": false
+      },
+      "description": "The verified, non-superseded claims worth recapping, best first: salience descending, ties by claim id. Must be the complete top of that list."
+    }
+  },
+  "required": [
+    "schema_version",
+    "match_id",
+    "as_of_seq",
+    "status",
+    "score",
+    "snapshot_id",
+    "key_moments"
+  ],
+  "additionalProperties": false,
+  "description": "Materialized view the Recap Editor and personalizer read instead of re-deriving it. Everything in it is derivable and re-checked.",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:receipts:schema:v1:match-state",
+  "title": "Match state (v1)"
+}

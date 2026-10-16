@@ -1,0 +1,83 @@
+{
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "$ref": "urn:receipts:schema:v1:common#/$defs/SchemaVersion"
+    },
+    "recap_id": {
+      "$ref": "urn:receipts:schema:v1:common#/$defs/RecapId"
+    },
+    "match_id": {
+      "$ref": "urn:receipts:schema:v1:common#/$defs/MatchId"
+    },
+    "kind": {
+      "enum": [
+        "half_time",
+        "full_time"
+      ]
+    },
+    "as_of_seq": {
+      "$ref": "urn:receipts:schema:v1:common#/$defs/Seq"
+    },
+    "lang": {
+      "$ref": "urn:receipts:schema:v1:common#/$defs/Lang"
+    },
+    "profile_id": {
+      "$ref": "urn:receipts:schema:v1:common#/$defs/ProfileId"
+    },
+    "sections": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "properties": {
+          "heading": {
+            "enum": [
+              "result",
+              "turning_point",
+              "standout_player",
+              "tactical_story",
+              "numbers"
+            ]
+          },
+          "claim_ids": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 4,
+            "uniqueItems": true,
+            "items": {
+              "$ref": "urn:receipts:schema:v1:common#/$defs/ClaimId"
+            }
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1600,
+            "description": "The cited claims' renderings in `lang`, joined by single spaces. Nothing else."
+          }
+        },
+        "required": [
+          "heading",
+          "claim_ids",
+          "text"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schema_version",
+    "recap_id",
+    "match_id",
+    "kind",
+    "as_of_seq",
+    "lang",
+    "sections"
+  ],
+  "additionalProperties": false,
+  "description": "A recap is an ordered selection of verified claims. The Recap Editor chooses and orders; it does not write new facts.",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:receipts:schema:v1:recap",
+  "title": "Match recap (v1)"
+}

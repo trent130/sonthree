@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0.0",
+  "match_id": "ngt-ald-demo01",
+  "as_of_seq": 16,
+  "status": "half_time",
+  "score": [
+    {
+      "team_id": "t_ngt",
+      "goals": 1
+    },
+    {
+      "team_id": "t_ald",
+      "goals": 0
+    }
+  ],
+  "snapshot_id": "snap_0000004",
+  "key_moments": [
+    {
+      "claim_id": "cl_0000001",
+      "rank": 1
+    },
+    {
+      "claim_id": "cl_0000005",
+      "rank": 2
+    },
+    {
+      "claim_id": "cl_0000002",
+      "rank": 3
+    },
+    {
+      "claim_id": "cl_0000003",
+      "rank": 4
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+# Tasks: Web app
+
+- [ ] 1. Scaffold and generated types
+  - Vite app, `gen:types` from the schemas, `ajv` dev validation, fixture loader from `contracts/examples/valid`.
+  - _Requirements: 8.2_
+- [ ] 2. Clock and pitch replay on fixtures
+  - `useClock`, `PitchCanvas` from `tracking_frame` events, play, pause, speed, seek.
+  - _Requirements: 1.1, 1.2_
+- [ ] 3. Overlay layer
+  - `selectActiveOverlays`, four kinds, slots, player tag following, momentum animation; tests that dropped overlays never render.
+  - _Requirements: 2.1, 2.2, 2.3, 2.4_
+- [ ] 4. Evidence chips and claim panel
+  - Chip, panel with assertion in words, verdict and lineage, highlighting cited events.
+  - _Requirements: 3.1, 3.2, 3.3_
+- [ ] 5. Profiles and language
+  - Profile bar, resubscribe on change, reviewed-text rules and markers.
+  - _Requirements: 4.1, 4.2, 4.3_
+- [ ] 6. Scoreboard and recap
+  - Match state display and recap view with chips.
+  - _Requirements: 1.3, 5.1_
+- [ ] 7. Transparency and latency HUDs
+  - Counters, zero-unverified indicator, latency percentiles and stage breakdown.
+  - _Requirements: 6.1, 6.2_
+- [ ] 8. Live wiring to the API
+  - SSE clients, replay control calls, reconnect and resume.
+  - _Requirements: 1.2, 4.2_
+- [ ] 9. Demo controls
+  - Inject a bad claim flow with rejection, hint and rewrite visualization.
+  - _Requirements: 7.1, 7.2_
+- [ ] 10. Polish
+  - Theme, responsive layout, keyboard and contrast pass, empty and error states.
+  - _Requirements: 8.1_
+- [ ] 11. Acceptance target
+  - `make accept-web`: type generation check, unit and component tests, Playwright e2e on the demo match in replay mode.

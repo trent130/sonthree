@@ -1,0 +1,210 @@
+{
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "$ref": "urn:receipts:schema:v1:common#/$defs/SchemaVersion"
+    },
+    "label_id": {
+      "$ref": "urn:receipts:schema:v1:common#/$defs/LabelId"
+    },
+    "split": {
+      "enum": [
+        "dev",
+        "test"
+      ],
+      "description": "Tune prompts and thresholds on dev. Publish numbers from test only. A corrupted label always shares its base label's split."
+    },
+    "origin": {
+      "enum": [
+        "generated_clean",
+        "generated_corrupted",
+        "hand_written"
+      ]
+    },
+    "difficulty": {
+      "enum": [
+        "obvious",
+        "subtle"
+      ]
+    },
+    "claim": {
+      "$ref": "urn:receipts:schema:v1:claim"
+    },
+    "corruption": {
+      "type": "object",
+      "properties": {
+        "operator": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/CorruptionOperator"
+        },
+        "base_label_id": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/LabelId"
+        },
+        "detail": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "operator",
+        "base_label_id",
+        "detail"
+      ],
+      "additionalProperties": false,
+      "description": "What was changed, and in which clean label. Only for generated_corrupted."
+    },
+    "expected": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "verified",
+            "rejected"
+          ]
+        },
+        "failure_codes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "allOf": [
+              {
+                "$ref": "urn:receipts:schema:v1:common#/$defs/FailureCode"
+              },
+              {
+                "not": {
+                  "const": "schema_invalid"
+                }
+              }
+            ]
+          }
+        },
+        "failed_checks": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "urn:receipts:schema:v1:common#/$defs/CheckId"
+          }
+        },
+        "rewritable": {
+          "type": "boolean",
+          "description": "Rejected labels only. True when a correct claim exists that the Narrator could rewrite to. The denominator of the rewrite-success rate."
+        }
+      },
+      "required": [
+        "status",
+        "failure_codes",
+        "failed_checks"
+      ],
+      "additionalProperties": false,
+      "description": "What a correct Verifier returns for this claim.",
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "verified"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "properties": {
+              "failure_codes": {
+                "maxItems": 0
+              },
+              "failed_checks": {
+                "maxItems": 0
+              },
+              "rewritable": false
+            }
+          },
+          "else": {
+            "properties": {
+              "failure_codes": {
+                "minItems": 1
+              },
+              "failed_checks": {
+                "minItems": 1
+              }
+            },
+            "required": [
+              "rewritable"
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "required": [
+    "schema_version",
+    "label_id",
+    "split",
+    "origin",
+    "difficulty",
+    "claim",
+    "expected"
+  ],
+  "additionalProperties": false,
+  "description": "One Verifier test case (a JSONL line): a claim plus the verdict a correct Verifier must return. The claim is a full claim document, so the Verifier sees exactly what it sees in production.",
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "origin": {
+            "const": "generated_corrupted"
+          }
+        },
+        "required": [
+          "origin"
+        ]
+      },
+      "then": {
+        "required": [
+          "corruption"
+        ],
+        "properties": {
+          "expected": {
+            "properties": {
+              "status": {
+                "const": "rejected"
+              }
+            }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "corruption": false
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "origin": {
+            "const": "generated_clean"
+          }
+        },
+        "required": [
+          "origin"
+        ]
+      },
+      "then": {
+        "properties": {
+          "expected": {
+            "properties": {
+              "status": {
+                "const": "verified"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:receipts:schema:v1:eval-label",
+  "title": "Verifier eval label (v1)"
+}

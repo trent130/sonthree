@@ -1,0 +1,31 @@
+# Tasks: Eval harness
+
+- [ ] 1. Port the example mutator
+  - Move the 8 operators from `make_example_evalset.py` into `evals/mutator`, with tests that each changes exactly one thing.
+  - _Requirements: 1.1, 1.2_
+- [ ] 2. Remaining operators
+  - Implement the other 7, explicit skips, schema-validity tests over generator output.
+  - _Requirements: 1.1, 1.3_
+- [ ] 3. Builder and manifest
+  - Match-level splits, clean and corrupted labels, hand-written YAML loader, manifest hashing; output passes `validate.py --eval`.
+  - _Requirements: 2.1, 2.2, 2.4_
+- [ ] 4. Scale and traps
+  - Reach the minimum counts, add the false-positive traps, freeze `set_version 0.1.0` for dev iteration.
+  - _Requirements: 2.3, 2.5_
+- [ ] 5. Harness and metrics
+  - Verifier-by-module runner, comparison, all metrics with Wilson intervals, failure listing; tested with a fake Verifier.
+  - _Requirements: 3.1, 3.2, 3.5_
+- [ ] 6. Reproducibility and split rules
+  - Version recording, refusal to print test numbers without versions, determinism test.
+  - _Requirements: 3.3, 3.4, 6.1_
+- [ ] 7. Rewrite success
+  - Integrate the Narrator (replay cassettes) for the rewrite metric.
+  - _Requirements: 3.2_
+- [ ] 8. Report and Foundry mirror
+  - `docs/eval-report.md`, deterministic-class versus judge-class sections, best-effort upload.
+  - _Requirements: 4.1, 4.2, 5.1, 5.2_
+- [ ] 9. Freeze and run on test
+  - After the Verifier freeze, run once on test, commit the report, and treat the split as read-only.
+  - _Requirements: 6.1_
+- [ ] 10. Acceptance target
+  - `make accept-evals`: operator and builder tests, `validate.py --eval` on the built set, harness against the fake Verifier, report generation.

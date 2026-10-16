@@ -1,0 +1,34 @@
+# Tasks: Verifier
+
+- [ ] 1. Verdict builder and runner skeleton
+  - Build, validate and store verdicts; ids, attempt numbering, idempotence; subscribe and publish.
+  - _Requirements: 1.1, 1.2, 1.3, 4.2, 4.3_
+- [ ] 2. Evidence checks
+  - `evidence_resolves`, `evidence_within_as_of`, `evidence_supports_assertion` with the attribution rules.
+  - _Requirements: 2.1, 2.2, 2.3_
+- [ ] 3. Numeric check
+  - `assertion_numeric_match` for the three metric kinds via `stats_ref`, including undefined results.
+  - _Requirements: 2.4_
+- [ ] 4. Causal checks and pattern registry
+  - `causal_precedence`, dependency waiting, three starting patterns, tests for each including the two eval-fixture failures (`invent_causal_link`, `reverse_causal_order`).
+  - _Requirements: 2.5, 2.6, 4.1_
+- [ ] 5. Rendering numeric pre-pass
+  - Numeral and shirt-number extraction and matching; `rendering_adds_detail` and `rendering_contradicts` outcomes.
+  - _Requirements: 2.7_
+- [ ] 6. Rewrite hints
+  - Template per failure code; assert hints are never empty and never model-generated.
+  - _Requirements: 1.4_
+- [ ] 7. Judge
+  - Structured output, temperature 0, separate deployment, cassette tests, pending-and-retry behavior when unavailable.
+  - _Requirements: 3.1, 3.2, 3.3, 3.4_
+- [ ] 8. Translation fidelity
+  - Deterministic number and name comparison plus judge meaning check; never set `human_reviewed`.
+  - _Requirements: 5.1, 5.2_
+- [ ] 9. Measure against the eval set
+  - Run spec 06's harness on the example set, then the full set; deterministic-class at 100 percent, clean at 0 percent false rejects; record judge-class results.
+  - _Requirements: 6.1, 6.2, 6.3_
+- [ ] 10. Latency
+  - Benchmark deterministic and judged paths; meet 6.4 or record the miss.
+  - _Requirements: 6.4_
+- [ ] 11. Acceptance target
+  - `make accept-verifier`: unit tests, `validate.py --verdicts` on all outputs, eval-set run with the quality gates above.

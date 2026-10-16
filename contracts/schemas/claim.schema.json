@@ -1,0 +1,480 @@
+{
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "$ref": "urn:receipts:schema:v1:common#/$defs/SchemaVersion"
+    },
+    "claim_id": {
+      "$ref": "urn:receipts:schema:v1:common#/$defs/ClaimId"
+    },
+    "match_id": {
+      "$ref": "urn:receipts:schema:v1:common#/$defs/MatchId"
+    },
+    "as_of_seq": {
+      "$ref": "urn:receipts:schema:v1:common#/$defs/Seq",
+      "description": "Latest event seq this claim may depend on. Anything newer is a future leak."
+    },
+    "produced_by": {
+      "type": "object",
+      "properties": {
+        "agent": {
+          "enum": [
+            "analyst",
+            "narrator",
+            "recap_editor"
+          ]
+        },
+        "run_id": {
+          "type": "string",
+          "pattern": "^run_[a-z0-9]{6,32}$"
+        },
+        "agent_version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+        }
+      },
+      "required": [
+        "agent",
+        "run_id",
+        "agent_version"
+      ],
+      "additionalProperties": false
+    },
+    "assertion": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/EventOccurred"
+        },
+        {
+          "$ref": "#/$defs/MetricValue"
+        },
+        {
+          "$ref": "#/$defs/MetricComparison"
+        },
+        {
+          "$ref": "#/$defs/MetricTrend"
+        },
+        {
+          "$ref": "#/$defs/CausalExplanation"
+        }
+      ]
+    },
+    "evidence": {
+      "type": "array",
+      "maxItems": 12,
+      "items": {
+        "$ref": "#/$defs/EvidenceRef"
+      }
+    },
+    "depends_on": {
+      "type": "array",
+      "uniqueItems": true,
+      "maxItems": 2,
+      "items": {
+        "$ref": "urn:receipts:schema:v1:common#/$defs/ClaimId"
+      }
+    },
+    "renderings": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": {
+        "$ref": "#/$defs/Rendering"
+      },
+      "contains": {
+        "properties": {
+          "lang": {
+            "const": "en"
+          }
+        },
+        "required": [
+          "lang"
+        ]
+      }
+    },
+    "salience": {
+      "$ref": "urn:receipts:schema:v1:common#/$defs/Probability",
+      "description": "How much this deserves screen time. Read by the overlay compiler and personalizer."
+    },
+    "supersedes": {
+      "$ref": "urn:receipts:schema:v1:common#/$defs/ClaimId"
+    }
+  },
+  "required": [
+    "schema_version",
+    "claim_id",
+    "match_id",
+    "as_of_seq",
+    "produced_by",
+    "assertion",
+    "evidence",
+    "depends_on",
+    "renderings",
+    "salience"
+  ],
+  "additionalProperties": false,
+  "description": "Atomic, machine-checkable assertion with its evidence. Immutable once emitted, except that renderings may be appended (translations). A rewrite is a new claim with `supersedes`.",
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "assertion": {
+            "properties": {
+              "kind": {
+                "const": "causal_explanation"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          }
+        },
+        "required": [
+          "assertion"
+        ]
+      },
+      "then": {
+        "properties": {
+          "depends_on": {
+            "minItems": 2
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "evidence": {
+            "minItems": 1
+          },
+          "depends_on": {
+            "maxItems": 0
+          }
+        }
+      }
+    }
+  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:receipts:schema:v1:claim",
+  "title": "Claim with evidence (v1)",
+  "$defs": {
+    "EventOccurred": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "event_occurred"
+        },
+        "event_type": {
+          "enum": [
+            "pass",
+            "shot",
+            "tackle",
+            "possession_change",
+            "pressure",
+            "foul",
+            "card",
+            "substitution"
+          ]
+        },
+        "subject": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/EntityRef"
+        },
+        "window": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/Window"
+        },
+        "attributes": {
+          "type": "object",
+          "maxProperties": 6,
+          "additionalProperties": {
+            "type": [
+              "string",
+              "number",
+              "boolean"
+            ]
+          },
+          "description": "Payload fields the event must match, e.g. {\"forced_turnover\": true}."
+        }
+      },
+      "required": [
+        "kind",
+        "event_type",
+        "window"
+      ],
+      "additionalProperties": false
+    },
+    "MetricValue": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "metric_value"
+        },
+        "subject": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/EntityRef"
+        },
+        "metric": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/MetricId"
+        },
+        "window": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/Window"
+        },
+        "op": {
+          "enum": [
+            "eq",
+            "approx",
+            "gt",
+            "gte",
+            "lt",
+            "lte"
+          ]
+        },
+        "value": {
+          "type": "number"
+        },
+        "tolerance": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "kind",
+        "subject",
+        "metric",
+        "window",
+        "op",
+        "value"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "op": {
+                "const": "approx"
+              }
+            },
+            "required": [
+              "op"
+            ]
+          },
+          "then": {
+            "required": [
+              "tolerance"
+            ]
+          }
+        }
+      ]
+    },
+    "MetricComparison": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "metric_comparison"
+        },
+        "metric": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/MetricId"
+        },
+        "window": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/Window"
+        },
+        "left": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/EntityRef"
+        },
+        "right": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/EntityRef"
+        },
+        "relation": {
+          "enum": [
+            "greater",
+            "less",
+            "roughly_equal"
+          ]
+        },
+        "margin_min": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "kind",
+        "metric",
+        "window",
+        "left",
+        "right",
+        "relation"
+      ],
+      "additionalProperties": false
+    },
+    "MetricTrend": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "metric_trend"
+        },
+        "subject": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/EntityRef"
+        },
+        "metric": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/MetricId"
+        },
+        "baseline_window": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/Window"
+        },
+        "comparison_window": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/Window"
+        },
+        "direction": {
+          "enum": [
+            "increase",
+            "decrease",
+            "stable"
+          ]
+        },
+        "min_relative_change": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "kind",
+        "subject",
+        "metric",
+        "baseline_window",
+        "comparison_window",
+        "direction"
+      ],
+      "additionalProperties": false
+    },
+    "CausalExplanation": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "const": "causal_explanation"
+        },
+        "cause_claim_id": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/ClaimId"
+        },
+        "effect_claim_id": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/ClaimId"
+        },
+        "mechanism": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "kind",
+        "cause_claim_id",
+        "effect_claim_id",
+        "mechanism"
+      ],
+      "additionalProperties": false,
+      "description": "A causal story is never free text: it is a link between two other claims that must each verify, with the cause ending no later than the effect."
+    },
+    "EvidenceRef": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "event"
+            },
+            "event_id": {
+              "$ref": "urn:receipts:schema:v1:common#/$defs/EventId"
+            },
+            "role": {
+              "enum": [
+                "primary",
+                "context"
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "event_id"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "seq_range"
+            },
+            "from_seq": {
+              "$ref": "urn:receipts:schema:v1:common#/$defs/Seq"
+            },
+            "to_seq": {
+              "$ref": "urn:receipts:schema:v1:common#/$defs/Seq"
+            },
+            "role": {
+              "enum": [
+                "primary",
+                "context"
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "from_seq",
+            "to_seq"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "metric_snapshot"
+            },
+            "snapshot_id": {
+              "$ref": "urn:receipts:schema:v1:common#/$defs/SnapshotId"
+            },
+            "as_of_seq": {
+              "$ref": "urn:receipts:schema:v1:common#/$defs/Seq"
+            },
+            "role": {
+              "enum": [
+                "primary",
+                "context"
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "snapshot_id",
+            "as_of_seq"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Rendering": {
+      "type": "object",
+      "properties": {
+        "lang": {
+          "$ref": "urn:receipts:schema:v1:common#/$defs/Lang"
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 400
+        },
+        "origin": {
+          "enum": [
+            "authored",
+            "translated"
+          ]
+        },
+        "human_reviewed": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "lang",
+        "text",
+        "origin",
+        "human_reviewed"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

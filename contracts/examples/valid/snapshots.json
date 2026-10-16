@@ -1,0 +1,149 @@
+[
+  {
+    "schema_version": "1.0.0",
+    "snapshot_id": "snap_0000001",
+    "match_id": "ngt-ald-demo01",
+    "as_of_seq": 15,
+    "stats_engine_version": "0.1.0",
+    "window": {
+      "from_ms": 0,
+      "to_ms": 20500
+    },
+    "entities": [
+      {
+        "subject": {
+          "entity_type": "team",
+          "entity_id": "t_ngt"
+        },
+        "metrics": {
+          "goals": 1.0,
+          "shots": 1.0,
+          "xg": 0.31,
+          "possession_pct": 70.7317,
+          "control_index": 62.439,
+          "pressures": 0.0
+        }
+      },
+      {
+        "subject": {
+          "entity_type": "team",
+          "entity_id": "t_ald"
+        },
+        "metrics": {
+          "goals": 0.0,
+          "shots": 0.0,
+          "xg": 0.0,
+          "possession_pct": 29.2683,
+          "control_index": 17.561,
+          "pressures": 1.0
+        }
+      }
+    ]
+  },
+  {
+    "schema_version": "1.0.0",
+    "snapshot_id": "snap_0000002",
+    "match_id": "ngt-ald-demo01",
+    "as_of_seq": 10,
+    "stats_engine_version": "0.1.0",
+    "window": {
+      "from_ms": 0,
+      "to_ms": 8000
+    },
+    "entities": [
+      {
+        "subject": {
+          "entity_type": "player",
+          "entity_id": "p_205"
+        },
+        "metrics": {
+          "pressures": 1.0,
+          "tackles_won": 1.0,
+          "top_speed_kmh": 12.4
+        }
+      }
+    ]
+  },
+  {
+    "schema_version": "1.0.0",
+    "snapshot_id": "snap_0000003",
+    "match_id": "ngt-ald-demo01",
+    "as_of_seq": 15,
+    "stats_engine_version": "0.1.0",
+    "window": {
+      "from_ms": 0,
+      "to_ms": 20500
+    },
+    "entities": [
+      {
+        "subject": {
+          "entity_type": "team",
+          "entity_id": "t_ngt"
+        },
+        "metrics": {
+          "control_index": 62.439
+        }
+      },
+      {
+        "subject": {
+          "entity_type": "team",
+          "entity_id": "t_ald"
+        },
+        "metrics": {
+          "control_index": 17.561
+        }
+      }
+    ]
+  },
+  {
+    "schema_version": "1.0.0",
+    "snapshot_id": "snap_0000004",
+    "match_id": "ngt-ald-demo01",
+    "as_of_seq": 16,
+    "stats_engine_version": "0.1.0",
+    "window": {
+      "from_ms": 0,
+      "to_ms": 2820000
+    },
+    "entities": [
+      {
+        "subject": {
+          "entity_type": "team",
+          "entity_id": "t_ngt"
+        },
+        "metrics": {
+          "goals": 1.0,
+          "shots": 1.0,
+          "xg": 0.31,
+          "possession_pct": 99.7872,
+          "control_index": 79.8723,
+          "pressures": 0.0
+        }
+      },
+      {
+        "subject": {
+          "entity_type": "team",
+          "entity_id": "t_ald"
+        },
+        "metrics": {
+          "goals": 0.0,
+          "shots": 0.0,
+          "xg": 0.0,
+          "possession_pct": 0.2128,
+          "control_index": 0.1277,
+          "pressures": 1.0,
+          "ppda": 1.5
+        }
+      },
+      {
+        "subject": {
+          "entity_type": "match",
+          "entity_id": "ngt-ald-demo01"
+        },
+        "metrics": {
+          "max_ball_speed_kmh": 96.4
+        }
+      }
+    ]
+  }
+]

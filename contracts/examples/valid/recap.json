@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0.0",
+  "recap_id": "rc_0000001",
+  "match_id": "ngt-ald-demo01",
+  "kind": "half_time",
+  "as_of_seq": 16,
+  "lang": "en",
+  "profile_id": "prof_analyst_en",
+  "sections": [
+    {
+      "heading": "numbers",
+      "claim_ids": [
+        "cl_0000001"
+      ],
+      "text": "Northgate's first chance, 20 seconds in, carried 0.31 xG."
+    },
+    {
+      "heading": "turning_point",
+      "claim_ids": [
+        "cl_0000002",
+        "cl_0000005"
+      ],
+      "text": "Aldermoor's No. 5 pressed Northgate's No. 10 and forced the turnover. That pressing spell set up the tackle that won Aldermoor the ball back."
+    }
+  ]
+}

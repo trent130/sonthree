@@ -22,3 +22,6 @@ out/
 build/
 dist/
 .env
+.agent/
+node_modules/
+agents/launch/

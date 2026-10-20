@@ -1,0 +1,60 @@
+{
+  "_comment": "Single source of truth for lanes. scripts/lanes.py reads this. Edit here, not in the scripts.",
+  "gate_cmds": ["make contracts", "make accept-foundation", "make accept-{lane}"],
+  "lanes": {
+    "generator": {
+      "num": "01", "spec": "01-generator", "wave": 0, "skip_create": true,
+      "owns": ["services/generator", "config/demo.json", "docs/data-validation.md"],
+      "accept_cmds": [],
+      "notes": "Already running in the main checkout. Do not create a worktree; merge it first."
+    },
+    "stats": {
+      "num": "02", "spec": "02-stats-engine", "wave": 1, "scaffold": "stats",
+      "owns": ["services/stats", "make/lane-stats.mk"],
+      "accept_cmds": ["python -m pytest -q services/stats"],
+      "stubs": "No stubs needed: build on contracts/stats_ref.py and examples. Use out/match_*.jsonl from the generator for benchmarks once it is merged; until then use contracts/examples/valid/match_stream.jsonl."
+    },
+    "verifier": {
+      "num": "03", "spec": "03-verifier", "wave": 1, "scaffold": "verifier",
+      "owns": ["services/verifier", "make/lane-verifier.mk"],
+      "accept_cmds": ["python -m pytest -q services/verifier"],
+      "stubs": "Recompute metrics with contracts/stats_ref.py directly, never by importing services/stats. Judge calls go through receipts_common.llm with replay cassettes. Test on contracts/examples/eval."
+    },
+    "agents": {
+      "num": "04", "spec": "04-agent-pipeline", "wave": 1, "scaffold": "agents",
+      "owns": ["services/agents", "config/glossary.sw.json", "config/glossary.fr.json", "make/lane-agents.mk"],
+      "accept_cmds": ["python -m pytest -q services/agents"],
+      "stubs": "Until the real Verifier merges, use a stub that answers on the bus using contracts/validate.check_claims and always-verify semantics for valid claims. Until the real stats engine merges, compute snapshots with contracts/stats_ref.py behind a small adapter you delete later."
+    },
+    "overlay": {
+      "num": "05", "spec": "05-overlay-compiler", "wave": 1, "scaffold": "overlay",
+      "owns": ["services/overlay", "make/lane-overlay.mk"],
+      "accept_cmds": ["python -m pytest -q services/overlay"],
+      "stubs": "Work from contracts/examples/valid (claims, verdicts, snapshots, profiles, overlays.jsonl). The compiler must regenerate overlays.jsonl semantically."
+    },
+    "evals": {
+      "num": "06", "spec": "06-eval-harness", "wave": 1, "scaffold": "evals",
+      "owns": ["services/evals", "docs/eval-report.md", "make/lane-evals.mk"],
+      "accept_cmds": ["python -m pytest -q services/evals"],
+      "stubs": "Use a fake Verifier with a known confusion matrix to test the harness. Port the operators from contracts/tools/make_example_evalset.py. Never modify contracts/."
+    },
+    "web": {
+      "num": "08", "spec": "08-web-app", "wave": 1, "scaffold": "api",
+      "owns": ["apps/web", "services/api", "make/lane-web.mk"],
+      "accept_cmds": ["python -m pytest -q services/api", "cd apps/web && pnpm test"],
+      "stubs": "Build against contracts/examples/valid fixtures served by a fixture mode in services/api. This lane also owns the FastAPI service (SSE relay, replay control, demo endpoints)."
+    },
+    "azure": {
+      "num": "07", "spec": "07-azure-deploy", "wave": 1,
+      "owns": ["infra", ".github/workflows/cd.yml", "services/common/src/receipts_common/bus/eventhubs.py", "services/common/src/receipts_common/store/postgres.py", "services/common/src/receipts_common/store/migrations", "make/lane-azure.mk"],
+      "accept_cmds": ["az bicep build --file infra/main.bicep --stdout > /dev/null"],
+      "stubs": "Spec 07 task 1 (access, region, quota) needs a human with the subscription. Do everything else offline: Bicep builds without credentials, and the conformance suite for the Azure bus and store skips when credentials are absent."
+    },
+    "integration": {
+      "num": "09", "spec": "09-demo-integration", "wave": 2, "skip_create": true,
+      "owns": ["scripts/demo.py", "scripts/check_run.py", "scripts/report.py", "docs/REPORT.md", "docs/demo-script.md", "make/lane-integration.mk"],
+      "accept_cmds": [],
+      "notes": "Starts after wave 1 lanes are merged. Create its worktree manually with: python scripts/lanes.py create integration --force"
+    }
+  }
+}

@@ -14,6 +14,7 @@ dependencies = [
     "pydantic-settings>=2.2",
     "opentelemetry-api>=1.25",
     "opentelemetry-sdk>=1.25",
+    "fastjsonschema>=2.21",
 ]
 
 [project.optional-dependencies]
@@ -26,8 +27,9 @@ packages = [
     "receipts_common.bus",
     "receipts_common.store",
     "receipts_common.llm",
+    "generator",
 ]
-package-dir = { "" = "contracts", "receipts_common" = "services/common/src/receipts_common" }
+package-dir = { "" = "contracts", "receipts_common" = "services/common/src/receipts_common", "generator" = "services/generator/src/generator" }
 
 [tool.pytest.ini_options]
 testpaths = ["services/common/tests"]
@@ -36,7 +38,7 @@ addopts = "-ra"
 [tool.ruff]
 line-length = 100
 target-version = "py312"
-src = ["services/common/src"]
+src = ["services/common/src", "services/generator/src"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]

@@ -1,0 +1,21 @@
+{
+  "cut_minutes": 20,
+  "cut_narrative_flags": {
+    "card": true,
+    "first_half_goal": true,
+    "forced_turnover_to_shot": true,
+    "lead_change": true
+  },
+  "cut_sha256": "2af9bc564aa53164cffdf5eb85eff0ba4d5d6915ba83f10983fc3425072554a7",
+  "full_match_minutes": 90,
+  "generator": "receipts-synthetic-generator",
+  "narrative_flags": {
+    "card": true,
+    "first_half_goal": true,
+    "forced_turnover_to_shot": true,
+    "lead_change": true
+  },
+  "narrative_score": 4,
+  "seed": 82,
+  "version": "0.1.0"
+}

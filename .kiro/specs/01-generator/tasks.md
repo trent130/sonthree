@@ -1,31 +1,31 @@
 # Tasks: Generator
 
-- [ ] 1. Skeleton that already passes the validator
+- [x] 1. Skeleton that already passes the validator
   - Generate teams, roster, metadata, period events and a kick-off from a seed. Output validates and is deterministic.
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 2.1_
-- [ ] 2. Possession machine and actions
+- [x] 2. Possession machine and actions
   - Possession spells, `possession_change` with correct `cause`, passes, tackles, pressure events, `possession_id` on all.
   - _Requirements: 2.2, 2.3_
-- [ ] 3. Shots and the xG model
+- [x] 3. Shots and the xG model
   - `receipts-xg-1`, shot outcomes, goalkeeper, assist link, ball speed; calibration test.
   - _Requirements: 3.4_
-- [ ] 4. Movement and tracking frames
+- [x] 4. Movement and tracking frames
   - Kinematic players and ball, frames at `tracking_hz`, speed and distance consistency, ball-to-event proximity.
   - _Requirements: 3.1, 3.2, 3.3_
-- [ ] 5. Fouls, cards, substitutions and momentum
+- [x] 5. Fouls, cards, substitutions and momentum
   - Add rates, causal links between fouls and cards, momentum process.
   - _Requirements: 2.4_
-- [ ] 6. Realism report
+- [x] 6. Realism report
   - Batch of 200 seeds, distribution table against target ranges, failing exit code on violation, committed to `docs/data-validation.md`.
   - _Requirements: 4.1, 4.2, 4.3_
-- [ ] 7. Streaming
+- [x] 7. Streaming
   - Paced publishing to the EventBus, speed multiplier, `--from-seq`, pause and resume, `emitted_at` stamping.
   - _Requirements: 5.1, 5.2, 5.3_
-- [ ] 8. Demo seed
+- [x] 8. Demo seed
   - `find-demo-seed`, `config/demo.json`, the 20-minute cut and golden hash.
   - _Requirements: 6.1, 6.2_
-- [ ] 9. Performance pass
+- [x] 9. Performance pass
   - Profile; meet the 60 s and 60x targets.
   - _Requirements: 7.1_
-- [ ] 10. Acceptance target
+- [x] 10. Acceptance target
   - `make accept-generator`: `validate.py` on 5 seeds including the demo seed, determinism check, realism report, golden hash.

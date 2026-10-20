@@ -3,7 +3,7 @@ PY ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,$(if $(wildcard contrac
 PYTHON := $(abspath $(shell command -v "$(PY)"))
 LANES := foundation generator stats verifier agents overlay evals azure web
 
-.PHONY: setup contracts contracts-lock-check lint accept accept-00-foundation $(addprefix accept-,$(LANES)) demo demo-live report
+.PHONY: setup contracts contracts-lock-check lint accept accept-00-foundation accept-01-generator $(addprefix accept-,$(LANES)) demo demo-live report
 
 setup:
 	@if [ ! -x .venv/bin/python ]; then $(PYTHON) -m venv .venv; fi
@@ -17,7 +17,7 @@ contracts-lock-check:
 	$(PYTHON) scripts/contracts_lock.py --check
 
 lint:
-	$(PYTHON) -m ruff check services/common scripts
+	$(PYTHON) -m ruff check services/common services/generator scripts
 
 accept: contracts contracts-lock-check $(addprefix accept-,$(LANES))
 
@@ -28,33 +28,17 @@ accept-00-foundation: accept-foundation
 
 accept-generator:
 	$(PY) -m pytest -q services/generator
-	$(PY) -m generator generate --seed 7 --minutes 90 --out out/match_7.jsonl
-	$(PY) contracts/validate.py out/match_7.jsonl
+	$(PY) -m generator verify-demo --config config/demo.json --cut tests/golden/demo-20min.jsonl --golden tests/golden/demo-20min.sha256
+	@for seed in 7 19 42 73 $$( $(PY) -c 'import json; print(json.load(open("config/demo.json"))["seed"])' ); do \
+		$(PY) -m generator generate --seed $$seed --minutes 90 --hz 1 --out out/match_$$seed.jsonl || exit $$?; \
+		$(PY) contracts/validate.py out/match_$$seed.jsonl || exit $$?; \
+	done
+	$(PY) -m generator generate --seed 7 --minutes 20 --hz 1 --out out/determinism_a.jsonl
+	$(PY) -m generator generate --seed 7 --minutes 20 --hz 1 --out out/determinism_b.jsonl
+	cmp out/determinism_a.jsonl out/determinism_b.jsonl
 	$(PY) -m generator report --seeds 1-200 --out docs/data-validation.md
 
-accept-stats:
-	$(PY) -m pytest -q services/stats
-	$(PY) contracts/validate.py out/match_7.jsonl --snapshots out/snapshots.json --state out/match_state.json
-
-accept-verifier:
-	$(PY) -m pytest -q services/verifier
-	$(PY) -m verifier eval --manifest contracts/examples/eval/manifest.json
-
-accept-agents:
-	$(PY) -m pytest -q services/agents
-
-accept-overlay:
-	$(PY) -m pytest -q services/overlay
-
-accept-evals:
-	$(PY) -m pytest -q services/evals
-	$(PY) contracts/validate.py --eval evals/sets/current/manifest.json
-
-accept-azure:
-	az bicep build --file infra/main.bicep --stdout > /dev/null
-
-accept-web:
-	cd apps/web && pnpm test && pnpm e2e
+accept-01-generator: accept-generator
 
 demo:
 	$(PY) scripts/demo.py --local --minutes 20 --speed 20
@@ -64,3 +48,6 @@ demo-live:
 
 report:
 	$(PY) scripts/report.py
+
+# Lane-owned targets (one fragment per lane, edited only from that lane's worktree).
+-include make/*.mk
